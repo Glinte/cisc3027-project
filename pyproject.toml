@@ -6,9 +6,13 @@ readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
     "albumentations>=1.4.21",
+    "labml-helpers>=0.4.89",
+    "labml-nn>=0.4.135",
+    "labml>=0.5.3",
     "numpy<2",
     "pyright>=1.1.387",
     "torch>=2.5.1",
+    "torchvision>=0.20.1",
     "transformers>=4.46.1",
 ]
 
