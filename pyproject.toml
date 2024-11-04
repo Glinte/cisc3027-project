@@ -7,7 +7,9 @@ requires-python = ">=3.12"
 dependencies = [
     "albumentations>=1.4.21",
     "numpy<2",
+    "pyright>=1.1.387",
     "torch>=2.5.1",
+    "transformers>=4.46.1",
 ]
 
 [build-system]
