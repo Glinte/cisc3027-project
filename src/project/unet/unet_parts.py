@@ -28,7 +28,7 @@ class DoubleConv(nn.Module):
 class Down(nn.Module):
     """Downscaling with maxpool then double conv"""
 
-    def __init__(self, in_channels, out_channels):
+    def __init__(self, in_channels: int, out_channels: int):
         super().__init__()
         self.maxpool_conv = nn.Sequential(
             nn.MaxPool2d(2), DoubleConv(in_channels, out_channels)
@@ -41,7 +41,7 @@ class Down(nn.Module):
 class Up(nn.Module):
     """Upscaling then double conv"""
 
-    def __init__(self, in_channels, out_channels, bilinear=True):
+    def __init__(self, in_channels, out_channels, bilinear: bool = True):
         super().__init__()
 
         # if bilinear, use the normal convolutions to reduce the number of channels
