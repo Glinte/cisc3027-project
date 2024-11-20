@@ -19,7 +19,8 @@ class ClinicDB(VisionDataset):
 
     ClinicDB is a dataset for the evaluation of image-based colonoscopy analysis.
     """
-    base_folder = "CVC-ClinicDB"
+    original_folder = "Original"
+    mask_folder = "Ground Truth"
     url = "https://www.dropbox.com/s/p5qe9eotetjnbmq/CVC-ClinicDB.rar?dl=1"
     train_percentage = 0.7
     validation_percentage = 0.15
@@ -52,8 +53,7 @@ class ClinicDB(VisionDataset):
         self.data = []
         self.targets = []
 
-        folder_path = os.path.join(self.root, self.base_folder)
-        if not os.path.exists(folder_path):
+        if not os.path.exists(self.root):
             raise RuntimeError(
                 f"Dataset not found. Please download it manually from {self.url}"
             )
@@ -61,12 +61,12 @@ class ClinicDB(VisionDataset):
         def _parse_file_index(file):
             return int(file.split(".")[0])
 
-        images = sorted(os.listdir(os.path.join(folder_path, "Original")), key=_parse_file_index)
-        masks = sorted(os.listdir(os.path.join(folder_path, "Ground Truth")), key=_parse_file_index)
+        images = sorted(os.listdir(os.path.join(self.root, self.original_folder)), key=_parse_file_index)
+        masks = sorted(os.listdir(os.path.join(self.root, self.mask_folder)), key=_parse_file_index)
 
         all_data = [
-            (io.imread(os.path.join(folder_path, "Original", img)),
-             io.imread(os.path.join(folder_path, "Ground Truth", mask)))
+            (io.imread(os.path.join(self.root, self.original_folder, img)),
+             io.imread(os.path.join(self.root, self.mask_folder, mask)))
             for img, mask in zip(images, masks)
         ]
 
