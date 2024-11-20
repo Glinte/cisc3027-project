@@ -1153,6 +1153,19 @@ wheels = [
 ]
 
 [[package]]
+name = "metaimageio"
+version = "1.2.2"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "imageio" },
+    { name = "numpy" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/d3/5d/d4aeae5d06f10dfc69f69b0321280d6ccbf12ac2e190b32dadfc7fab7530/metaimageio-1.2.2.tar.gz", hash = "sha256:95190b356df0600548d2ca2c61d80fe21fc65cddb01dadb25e4cfb747a185c93", size = 8767 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/c0/da/ccf8c99134a0743a272d35ea41121a28674f5b29e5f06bdb644524c35b2f/metaimageio-1.2.2-py3-none-any.whl", hash = "sha256:55d867c47079f903d6fe4ae883282271e6f896874b9113780c280fd5d0686909", size = 9294 },
+]
+
+[[package]]
 name = "mistune"
 version = "3.0.2"
 source = { registry = "https://pypi.org/simple" }
@@ -1427,6 +1440,23 @@ wheels = [
 ]
 
 [[package]]
+name = "opencv-python"
+version = "4.10.0.84"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "numpy" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/4a/e7/b70a2d9ab205110d715906fc8ec83fbb00404aeb3a37a0654fdb68eb0c8c/opencv-python-4.10.0.84.tar.gz", hash = "sha256:72d234e4582e9658ffea8e9cae5b63d488ad06994ef12d81dc303b17472f3526", size = 95103981 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/66/82/564168a349148298aca281e342551404ef5521f33fba17b388ead0a84dc5/opencv_python-4.10.0.84-cp37-abi3-macosx_11_0_arm64.whl", hash = "sha256:fc182f8f4cda51b45f01c64e4cbedfc2f00aff799debebc305d8d0210c43f251", size = 54835524 },
+    { url = "https://files.pythonhosted.org/packages/64/4a/016cda9ad7cf18c58ba074628a4eaae8aa55f3fd06a266398cef8831a5b9/opencv_python-4.10.0.84-cp37-abi3-macosx_12_0_x86_64.whl", hash = "sha256:71e575744f1d23f79741450254660442785f45a0797212852ee5199ef12eed98", size = 56475426 },
+    { url = "https://files.pythonhosted.org/packages/81/e4/7a987ebecfe5ceaf32db413b67ff18eb3092c598408862fff4d7cc3fd19b/opencv_python-4.10.0.84-cp37-abi3-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:09a332b50488e2dda866a6c5573ee192fe3583239fb26ff2f7f9ceb0bc119ea6", size = 41746971 },
+    { url = "https://files.pythonhosted.org/packages/3f/a4/d2537f47fd7fcfba966bd806e3ec18e7ee1681056d4b0a9c8d983983e4d5/opencv_python-4.10.0.84-cp37-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:9ace140fc6d647fbe1c692bcb2abce768973491222c067c131d80957c595b71f", size = 62548253 },
+    { url = "https://files.pythonhosted.org/packages/1e/39/bbf57e7b9dab623e8773f6ff36385456b7ae7fa9357a5e53db732c347eac/opencv_python-4.10.0.84-cp37-abi3-win32.whl", hash = "sha256:2db02bb7e50b703f0a2d50c50ced72e95c574e1e5a0bb35a8a86d0b35c98c236", size = 28737688 },
+    { url = "https://files.pythonhosted.org/packages/ec/6c/fab8113424af5049f85717e8e527ca3773299a3c6b02506e66436e19874f/opencv_python-4.10.0.84-cp37-abi3-win_amd64.whl", hash = "sha256:32dbbd94c26f611dc5cc6979e6b7aa1f55a64d6b463cc1dcd3c95505a63e48fe", size = 38842521 },
+]
+
+[[package]]
 name = "opencv-python-headless"
 version = "4.10.0.84"
 source = { registry = "https://pypi.org/simple" }
@@ -1605,15 +1635,18 @@ source = { editable = "." }
 dependencies = [
     { name = "albumentations" },
     { name = "gradio" },
+    { name = "imageio" },
     { name = "labml" },
     { name = "labml-helpers" },
     { name = "labml-nn" },
+    { name = "metaimageio" },
     { name = "notebook" },
     { name = "numpy" },
     { name = "pip" },
     { name = "pyright" },
     { name = "scikit-image" },
     { name = "scikit-learn" },
+    { name = "supervision" },
     { name = "torch" },
     { name = "torchvision" },
     { name = "transformers" },
@@ -1623,15 +1656,18 @@ dependencies = [
 requires-dist = [
     { name = "albumentations", specifier = ">=1.4.21" },
     { name = "gradio", specifier = "==3.50.2" },
+    { name = "imageio", specifier = ">=2.36.0" },
     { name = "labml", specifier = ">=0.5.3" },
     { name = "labml-helpers", specifier = ">=0.4.89" },
     { name = "labml-nn", specifier = ">=0.4.135" },
+    { name = "metaimageio", specifier = ">=1.2.2" },
     { name = "notebook", specifier = ">=7.2.2" },
     { name = "numpy", specifier = "<2" },
     { name = "pip", specifier = ">=24.3.1" },
     { name = "pyright", specifier = ">=1.1.387" },
     { name = "scikit-image", specifier = ">=0.24.0" },
     { name = "scikit-learn", specifier = ">=1.5.2" },
+    { name = "supervision", specifier = ">=0.24.0" },
     { name = "torch", specifier = ">=2.5.1" },
     { name = "torchvision", specifier = ">=0.20.1" },
     { name = "transformers", specifier = ">=4.46.1" },
@@ -2283,6 +2319,24 @@ wheels = [
     { url = "https://files.pythonhosted.org/packages/47/15/3dfe510273987af05bf917977ef410dc1f63e43886f9caf4d8d429628501/stringzilla-3.10.7-cp312-cp312-win32.whl", hash = "sha256:e2ad1235adf93a79e8ff4301616292e5a52849ad64160821d3eb17f8388ba8b9", size = 68363 },
     { url = "https://files.pythonhosted.org/packages/7a/f4/b2f71fa0491e3637c452265a44a43cd8d845dbd95f96bd8236b11fdd16e1/stringzilla-3.10.7-cp312-cp312-win_amd64.whl", hash = "sha256:6c116be5c4ae1b0dcc74da74d0616210254fd9f612413869425b09146d900b4e", size = 78906 },
     { url = "https://files.pythonhosted.org/packages/41/ed/f082b4e9935f94838ca8099446f9abee87fde8375e3d6e5667821ee923da/stringzilla-3.10.7-cp312-cp312-win_arm64.whl", hash = "sha256:6755ef43820a9e2eed25dd02d2eafe78996375bc7b2a01a6aeee9014a7ed1b6f", size = 67201 },
+]
+
+[[package]]
+name = "supervision"
+version = "0.24.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "defusedxml" },
+    { name = "matplotlib" },
+    { name = "numpy" },
+    { name = "opencv-python" },
+    { name = "pillow" },
+    { name = "pyyaml" },
+    { name = "scipy" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/4f/28/2dcf6113362f02a19eb9cec168be66a93e9e07385ff11c17e7a33312e5f1/supervision-0.24.0.tar.gz", hash = "sha256:ae71963a294c94cbf2a62e71dae60cc7756025b65bad439b9e374f8d902f0b66", size = 136891 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/01/7e/5119f9a669a50d2dce859f5e1c415f46bd3fe9ea36aa69fb7149f48fa361/supervision-0.24.0-py3-none-any.whl", hash = "sha256:d2b3b94d00dd98b56c39000a09c5316ea95c38be0e545bbe6cedb442a0e0d039", size = 158211 },
 ]
 
 [[package]]

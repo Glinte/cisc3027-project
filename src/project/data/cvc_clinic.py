@@ -5,14 +5,12 @@ from typing import Callable, Tuple, Literal, Mapping
 import numpy as np
 import torch
 from skimage import io
-from PIL import Image
+from supervision import mask_to_xyxy
 from torch import Tensor
 from torchvision import tv_tensors
 from torchvision.datasets import VisionDataset
 from torch.utils.data import DataLoader
 from torchvision.tv_tensors import BoundingBoxFormat
-
-from project.helpers import mask_to_boxes
 
 
 class ClinicDB(VisionDataset):
@@ -99,7 +97,7 @@ class ClinicDB(VisionDataset):
         img = tv_tensors.Image(img)
         target = {
             "masks": tv_tensors.Mask(target),
-            "bbox": tv_tensors.BoundingBoxes(mask_to_boxes(torch.tensor(target)), format=BoundingBoxFormat.XYXY, canvas_size=img.size)
+            "bbox": tv_tensors.BoundingBoxes(mask_to_xyxy(torch.tensor(target)), format=BoundingBoxFormat.XYXY, canvas_size=img.size)
         }
 
         if self.transforms is not None:
