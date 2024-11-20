@@ -1,21 +1,13 @@
-"""
----
-title: LUNA16 dataset for the U-Net experiment
-summary: >
-  LUNA16 dataset for the U-Net experiment.
----
+from typing import Callable, Any
 
-# LUNA16 Dataset for the [U-Net](index.html) [experiment](experiment.html)
-
-Ensure you have the LUNA16 dataset downloaded and structured correctly.
-Save the training images inside `luna16/images` folder and the masks in `luna16/masks` folder.
-"""
-
-from torch import nn
 from pathlib import Path
 import torch.utils.data
-import torchvision
+import SimpleITK as sitk
 from PIL import Image
+from jaxtyping import Num
+from matplotlib import pyplot as plt
+
+from project.types import Array
 
 
 class Luna16Dataset(torch.utils.data.Dataset):
@@ -28,72 +20,78 @@ class Luna16Dataset(torch.utils.data.Dataset):
         images (dict): Dictionary mapping image IDs to image file paths.
         masks (dict): Dictionary mapping mask IDs to mask file paths.
         ids (list): List of image IDs.
-        transforms (torchvision.transforms.Compose): Transformations to apply to images and masks.
+        transforms (callable): Transformations to apply to images and masks.
     """
 
-    def __init__(self, image_path: Path, mask_path: Path):
+    images_path = ["subset0", "subset1", "subset2", "subset3", "subset4", "subset5", "subset6", "subset7", "subset8", "subset9"]
+    masks_path = ["seg-lungs-LUNA16"]
+
+    def __init__(self, root: str | Path, transforms: Callable | None = None):
         """
         Initializes the dataset.
 
         Args:
-            image_path (Path): Path to the directory containing images.
-            mask_path (Path): Path to the directory containing masks.
+            root: Root directory of dataset.
+            transforms: Transformations to apply to images and masks.
         """
-        # Get a dictionary of images by id
-        self.images = {p.stem: p for p in image_path.iterdir() if p.suffix in ['.png', '.jpg']}
-        # Get a dictionary of masks by id
-        self.masks = {p.stem: p for p in mask_path.iterdir() if p.suffix in ['.png', '.jpg']}
+        self.root = Path(root)
+        self.transforms = transforms
 
-        # Image ids list
+        self.images = {}
+        self.masks = {}
+        self.ids = []
+
+        for path in self.images_path:
+            file: Path
+            for file in (self.root / path).iterdir():
+                if file.suffix == ".mhd":
+                    self.images[file.stem] = file
+
+        for path in self.masks_path:
+            file: Path
+            for file in (self.root / path).iterdir():
+                if file.suffix == ".mhd":
+                    self.masks[file.stem] = file
+
         self.ids = list(self.images.keys())
 
-        # Transformations
-        self.transforms = torchvision.transforms.Compose([
-            torchvision.transforms.Resize((128, 128)),  # Adjust size as necessary
-            torchvision.transforms.ToTensor(),
-        ])
-
-    def __getitem__(self, idx: int):
-        """
-        Retrieves an image and its corresponding mask.
-
-        Args:
-            idx (int): Index of the image.
-
-        Returns:
-            tuple: A tuple containing the transformed image and the transformed mask.
-        """
-        # Get image id
-        id_ = self.ids[idx]
-        # Load image
-        image = Image.open(self.images[id_]).convert('L')  # Load as grayscale
-        # Transform image and convert it to a PyTorch tensor
-        image = self.transforms(image)
-
-        # Load mask
-        mask = Image.open(self.masks[id_]).convert('L')  # Load as grayscale
-        # Transform mask and convert it to a PyTorch tensor
-        mask = self.transforms(mask)
-
-        # Scale the mask appropriately if necessary (assuming binary masks)
-        mask = mask / mask.max() if mask.max() > 0 else mask
-
-        # Return the image and the mask
-        return image, mask
-
-    def __len__(self):
-        """
-        Returns the size of the dataset.
-
-        Returns:
-            int: Number of images in the dataset.
-        """
+    def __len__(self) -> int:
         return len(self.ids)
 
+    def __getitem__(self, idx: int) -> tuple[Num[Array, "..."], Num[Array, "..."]]:
+        """
+        Returns the image and mask at the given index.
 
-# Testing code
-if __name__ == '__main__':
-    ds = Luna16Dataset(Path('luna16/images'), Path('luna16/masks'))
-    print(f"Dataset size: {len(ds)}")
-    sample_image, sample_mask = ds[0]
-    print(f"Image shape: {sample_image.shape}, Mask shape: {sample_mask.shape}")
+        Args:
+            idx (int): Index of the image and mask.
+
+        Returns:
+            tuple: Tuple containing the image and mask.
+        """
+        image_id = self.ids[idx]
+        image, mask = sitk.ReadImage(self.images[image_id]), sitk.ReadImage(self.masks[image_id])
+        image, mask = sitk.GetArrayFromImage(image), sitk.GetArrayFromImage(mask)
+
+        if self.transforms:
+            image, mask = self.transforms(image, mask)
+
+        return image, mask
+
+
+def main():
+    dataset = Luna16Dataset(root=PROJEECT_ROOT / "data" / "LUNA16", transforms=None)
+    print(len(dataset))
+    image, mask = dataset[0]
+    print(type(image), type(mask))
+    print(image.shape, mask.shape)
+    print(image.dtype, mask.dtype)
+    print(image.tolist())
+    image = Image.fromarray(mask[70, :, :].astype("uint8") * 255)
+    image.show()
+    fig, ax = plt.subplots(1, 1)
+    ax.imshow(image)
+    plt.show()
+
+
+if __name__ == "__main__":
+    main()
