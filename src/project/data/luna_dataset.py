@@ -1,12 +1,15 @@
 from typing import Callable, Any
 
 from pathlib import Path
+
+import numpy as np
 import torch.utils.data
 import SimpleITK as sitk
 from PIL import Image
 from jaxtyping import Num
 from matplotlib import pyplot as plt
 
+from project.config import PROJECT_ROOT
 from project.types import Array
 
 
@@ -58,7 +61,7 @@ class Luna16Dataset(torch.utils.data.Dataset):
     def __len__(self) -> int:
         return len(self.ids)
 
-    def __getitem__(self, idx: int) -> tuple[Num[Array, "..."], Num[Array, "..."]]:
+    def __getitem__(self, idx: int) -> tuple[Num[Array, "1 depth height width"], Num[Array, "1 depth height width"]]:
         """
         Returns the image and mask at the given index.
 
@@ -71,6 +74,7 @@ class Luna16Dataset(torch.utils.data.Dataset):
         image_id = self.ids[idx]
         image, mask = sitk.ReadImage(self.images[image_id]), sitk.ReadImage(self.masks[image_id])
         image, mask = sitk.GetArrayFromImage(image), sitk.GetArrayFromImage(mask)
+        image, mask = image[np.newaxis], mask[np.newaxis]
 
         if self.transforms:
             image, mask = self.transforms(image, mask)
@@ -79,18 +83,14 @@ class Luna16Dataset(torch.utils.data.Dataset):
 
 
 def main():
-    dataset = Luna16Dataset(root=PROJEECT_ROOT / "data" / "LUNA16", transforms=None)
+    dataset = Luna16Dataset(root=PROJECT_ROOT / "data" / "LUNA16", transforms=None)
     print(len(dataset))
     image, mask = dataset[0]
     print(type(image), type(mask))
     print(image.shape, mask.shape)
     print(image.dtype, mask.dtype)
-    print(image.tolist())
-    image = Image.fromarray(mask[70, :, :].astype("uint8") * 255)
+    image = Image.fromarray(image[:, 70, :, :].squeeze().astype("uint8") * 255)
     image.show()
-    fig, ax = plt.subplots(1, 1)
-    ax.imshow(image)
-    plt.show()
 
 
 if __name__ == "__main__":
