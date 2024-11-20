@@ -108,7 +108,7 @@ class ClinicDB(VisionDataset):
     def __len__(self) -> int:
         return len(self.data)
 
-    def get_loader(self, batch_size: int, shuffle: bool = True, num_workers: int = 0):
+    def get_loader(self, batch_size: int, shuffle: bool = True, num_workers: int = 0) -> DataLoader[tuple[Tensor, Mapping[str, Tensor]]]:
         """
         Returns a DataLoader for the dataset.
 
