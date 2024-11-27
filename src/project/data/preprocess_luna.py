@@ -33,11 +33,11 @@ def make_mask(mask: np.ndarray, v_center: np.ndarray, v_diam: float, spacing: np
     logger.info(f"Mask set: {z_max} - {z_min}, {x_max} - {x_min}, {y_max} - {y_min}")
 
 
-def main():
+def generate_masks(luna_path: str | Path, output_path: str | Path):
     # Getting list of image files and save mask image files
     for subset_index in range(10):
-        luna_path = PROJECT_ROOT / "data" / "LUNA16"
-        output_path = PROJECT_ROOT / "data" / "LUNA16" / "mask"
+        luna_path = Path(luna_path)
+        output_path = Path(output_path)
 
         luna_subset_path = luna_path / ("subset" + str(subset_index))
         luna_subset_mask_path = output_path / ("subset" + str(subset_index))
@@ -90,4 +90,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    generate_masks(luna_path=PROJECT_ROOT / "data" / "LUNA16", output_path=PROJECT_ROOT / "data" / "LUNA16" / "mask")

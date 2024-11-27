@@ -19,8 +19,7 @@ class ClinicDB(VisionDataset):
 
     ClinicDB is a dataset for the evaluation of image-based colonoscopy analysis.
     """
-    original_folder = "Original"
-    mask_folder = "Ground Truth"
+    base_folder = "CVC-ClinicDB"
     url = "https://www.dropbox.com/s/p5qe9eotetjnbmq/CVC-ClinicDB.rar?dl=1"
     train_percentage = 0.7
     validation_percentage = 0.15
@@ -53,7 +52,8 @@ class ClinicDB(VisionDataset):
         self.data = []
         self.targets = []
 
-        if not os.path.exists(self.root):
+        folder_path = os.path.join(self.root, self.base_folder)
+        if not os.path.exists(folder_path):
             raise RuntimeError(
                 f"Dataset not found. Please download it manually from {self.url}"
             )
@@ -61,12 +61,12 @@ class ClinicDB(VisionDataset):
         def _parse_file_index(file):
             return int(file.split(".")[0])
 
-        images = sorted(os.listdir(os.path.join(self.root, self.original_folder)), key=_parse_file_index)
-        masks = sorted(os.listdir(os.path.join(self.root, self.mask_folder)), key=_parse_file_index)
+        images = sorted(os.listdir(os.path.join(folder_path, "Original")), key=_parse_file_index)
+        masks = sorted(os.listdir(os.path.join(folder_path, "Ground Truth")), key=_parse_file_index)
 
         all_data = [
-            (io.imread(os.path.join(self.root, self.original_folder, img)),
-             io.imread(os.path.join(self.root, self.mask_folder, mask)))
+            (io.imread(os.path.join(folder_path, "Original", img)),
+             io.imread(os.path.join(folder_path, "Ground Truth", mask)))
             for img, mask in zip(images, masks)
         ]
 
@@ -95,9 +95,11 @@ class ClinicDB(VisionDataset):
         """
         img, target = self.data[index], self.targets[index]
         img = tv_tensors.Image(img)
+        # Add channel dimension to target
+        target = np.expand_dims(target, axis=0)
         target = {
             "masks": tv_tensors.Mask(target),
-            "bbox": tv_tensors.BoundingBoxes(mask_to_xyxy(torch.tensor(target)), format=BoundingBoxFormat.XYXY, canvas_size=img.size)
+            # "bbox": tv_tensors.BoundingBoxes(mask_to_xyxy(torch.tensor(target)), format=BoundingBoxFormat.XYXY, canvas_size=img.size)
         }
 
         if self.transforms is not None:

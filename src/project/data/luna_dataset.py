@@ -1,16 +1,24 @@
+import os
 from typing import Callable, Any
 
 from pathlib import Path
+import logging
 
 import numpy as np
 import torch.utils.data
 import SimpleITK as sitk
+import torchvision.tv_tensors
 from PIL import Image
 from jaxtyping import Num
 from matplotlib import pyplot as plt
+from torchvision import tv_tensors
 
 from project.config import PROJECT_ROOT
+from project.data.preprocess_luna import generate_masks
 from project.types import Array
+
+
+logger = logging.getLogger(__name__)
 
 
 class Luna16Dataset(torch.utils.data.Dataset):
@@ -26,10 +34,12 @@ class Luna16Dataset(torch.utils.data.Dataset):
         transforms (callable): Transformations to apply to images and masks.
     """
 
-    images_path = ["subset0", "subset1", "subset2", "subset3", "subset4", "subset5", "subset6", "subset7", "subset8", "subset9"]
-    masks_path = ["seg-lungs-LUNA16"]
+    combined_images_path = ["subset0", "subset1", "subset2", "subset3", "subset4", "subset5", "subset6", "subset7", "subset8", "subset9"]
+    train_subset = ["subset0", "subset1", "subset2", "subset3", "subset4", "subset5", "subset6", "subset7"]
+    test_subset = ["subset8", "subset9"]
+    masks_path = "mask"
 
-    def __init__(self, root: str | Path, transforms: Callable | None = None):
+    def __init__(self, root: str | Path, transforms: Callable | None = None, train: bool = True):
         """
         Initializes the dataset.
 
@@ -39,24 +49,32 @@ class Luna16Dataset(torch.utils.data.Dataset):
         """
         self.root = Path(root)
         self.transforms = transforms
+        self.train = train
 
         self.images = {}
         self.masks = {}
         self.ids = []
 
-        for path in self.images_path:
+        if not os.path.exists(self.root / self.masks_path):
+            logger.warning(f"Mask directory not found at {self.root / self.masks_path}, generating masks.")
+            generate_masks(self.root, self.root / self.masks_path)
+
+        images_dir = self.train_subset if self.train else self.test_subset
+        for dir in images_dir:
             file: Path
-            for file in (self.root / path).iterdir():
+            for file in (self.root / dir).iterdir():
                 if file.suffix == ".mhd":
                     self.images[file.stem] = file
 
-        for path in self.masks_path:
-            file: Path
-            for file in (self.root / path).iterdir():
-                if file.suffix == ".mhd":
-                    self.masks[file.stem] = file
+        for dirpath, _dirnames, filenames in (self.root / self.masks_path).walk():
+            filepaths = [dirpath / filename for filename in filenames]
+            for file in filepaths:
+                uid = file.stem.rstrip("_segmentation")
+                if file.suffix == ".mhd" and uid in self.images:
+                    self.masks[uid] = file
 
         self.ids = list(self.images.keys())
+        assert len(self.images) == len(self.masks), "Number of images and masks do not match."
 
     def __len__(self) -> int:
         return len(self.ids)
@@ -75,6 +93,7 @@ class Luna16Dataset(torch.utils.data.Dataset):
         image, mask = sitk.ReadImage(self.images[image_id]), sitk.ReadImage(self.masks[image_id])
         image, mask = sitk.GetArrayFromImage(image), sitk.GetArrayFromImage(mask)
         image, mask = image[np.newaxis], mask[np.newaxis]
+        image, mask = tv_tensors.Image(image), tv_tensors.Mask(mask)
 
         if self.transforms:
             image, mask = self.transforms(image, mask)
@@ -90,7 +109,9 @@ def main():
     print(image.shape, mask.shape)
     print(image.dtype, mask.dtype)
     image = Image.fromarray(image[:, 70, :, :].squeeze().astype("uint8") * 255)
+    mask = Image.fromarray(mask[:, 70, :, :].squeeze().astype("uint8") * 255)
     image.show()
+    mask.show()
 
 
 if __name__ == "__main__":
