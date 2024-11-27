@@ -74,7 +74,9 @@ class Luna16Dataset(torch.utils.data.Dataset):
                     self.masks[uid] = file
 
         self.ids = list(self.images.keys())
-        assert len(self.images) == len(self.masks), "Number of images and masks do not match."
+        if len(self.images) != len(self.masks):
+            missing = set(self.images.keys()) - set(self.masks.keys())
+            raise ValueError(f"Missing masks for images: {missing}")
 
     def __len__(self) -> int:
         return len(self.ids)
@@ -92,6 +94,12 @@ class Luna16Dataset(torch.utils.data.Dataset):
         image_id = self.ids[idx]
         image, mask = sitk.ReadImage(self.images[image_id]), sitk.ReadImage(self.masks[image_id])
         image, mask = sitk.GetArrayFromImage(image), sitk.GetArrayFromImage(mask)
+        
+        if mask.dtype != np.uint8:
+            print(mask.dtype)
+            print(image_id)
+            mask = np.uint8(mask * 255)  # Completely black mask gets interpreted as boolean
+
         image, mask = image[np.newaxis], mask[np.newaxis]
         image, mask = tv_tensors.Image(image), tv_tensors.Mask(mask)
 
