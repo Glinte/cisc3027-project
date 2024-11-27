@@ -3,7 +3,7 @@ import torch.nn as nn
 
 from project.config import PROJECT_ROOT
 from project.data.luna_dataset import Luna16Dataset
-from project.vnet.netblocks import VNet_input_block, VNet_down_block, VNet_up_block, VNet_output_block
+from .netblocks import VNet_input_block, VNet_down_block, VNet_up_block, VNet_output_block
 
 
 class VNet(nn.Module):
