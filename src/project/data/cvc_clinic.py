@@ -95,6 +95,8 @@ class ClinicDB(VisionDataset):
         """
         img, target = self.data[index], self.targets[index]
         img = tv_tensors.Image(img)
+        # Add channel dimension to target
+        target = np.expand_dims(target, axis=0)
         target = {
             "masks": tv_tensors.Mask(target),
             # "bbox": tv_tensors.BoundingBoxes(mask_to_xyxy(torch.tensor(target)), format=BoundingBoxFormat.XYXY, canvas_size=img.size)
