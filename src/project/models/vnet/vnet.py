@@ -8,15 +8,15 @@ from .netblocks import VNet_input_block, VNet_down_block, VNet_up_block, VNet_ou
 
 class VNet(nn.Module):
     def __init__(self, num_classes=2) -> None:
-        super(VNet, self).__init__()
+        super().__init__()
 
         self.input_block = VNet_input_block(1, 16)
 
         self.down_block1 = VNet_down_block(16, 32, 2)
         self.down_block2 = VNet_down_block(32, 64, 3)
         self.down_block3 = VNet_down_block(64, 128, 3)
-        # self.down_block4 = VNet_down_block(128, 256, 3)
-        # self.up_block1 = VNet_up_block(256, 256, 3)
+        self.down_block4 = VNet_down_block(128, 256, 3)
+        self.up_block1 = VNet_up_block(256, 256, 3)
         self.up_block2 = VNet_up_block(256, 128, 3)
         self.up_block3 = VNet_up_block(128, 64, 2)
         self.up_block4 = VNet_up_block(64, 32, 1)
