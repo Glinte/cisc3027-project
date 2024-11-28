@@ -14,13 +14,15 @@
 
 
 from copy import deepcopy
-from nnunet.utilities.nd_softmax import softmax_helper
 from torch import nn
+import torch.nn.functional as F
 import torch
 import numpy as np
-from nnunet.network_architecture.initialization import InitWeights_He
-from nnunet.network_architecture.neural_network import SegmentationNetwork
+from project.network_architecture.initialization import InitWeights_He
+from project.network_architecture.neural_network import SegmentationNetwork
 import torch.nn.functional
+
+softmax_helper = lambda x: F.softmax(x, 1)
 
 
 class ConvDropoutNormNonlin(nn.Module):
