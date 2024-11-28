@@ -81,8 +81,10 @@ class ClinicDB(VisionDataset):
             self.data, self.targets = zip(*all_data[train_end:valid_end])
         elif self.split == 'test':
             self.data, self.targets = zip(*all_data[valid_end:])
+        else:
+            raise ValueError("unknown split type")
 
-        self.data = np.array(self.data)  # (N, H, W, C)
+        self.data = np.array(self.data)
         self.targets = np.array(self.targets)  # (N, H, W)
 
     def __getitem__(self, index: int) -> Tuple[Tensor, Mapping[str, Tensor]]:
@@ -97,10 +99,11 @@ class ClinicDB(VisionDataset):
         img = tv_tensors.Image(img)
         # Add channel dimension to target
         target = np.expand_dims(target, axis=0)
-        target = {
-            "masks": tv_tensors.Mask(target),
-            # "bbox": tv_tensors.BoundingBoxes(mask_to_xyxy(torch.tensor(target)), format=BoundingBoxFormat.XYXY, canvas_size=img.size)
-        }
+        target = tv_tensors.Mask(target)
+        # target = {
+        #     "masks": tv_tensors.Mask(target),
+        #     # "bbox": tv_tensors.BoundingBoxes(mask_to_xyxy(torch.tensor(target)), format=BoundingBoxFormat.XYXY, canvas_size=img.size)
+        # }
 
         if self.transforms is not None:
             img, target = self.transforms(img, target)
