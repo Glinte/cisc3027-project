@@ -54,7 +54,7 @@ class BinaryDiceLoss(nn.Module):
         self.p = p
         self.reduction = reduction
 
-    def forward(self, predict, target):
+    def forward(self, predict: torch.Tensor, target: torch.Tensor):
         """
         Args:
             predict: A tensor of shape [N, *]
@@ -93,13 +93,19 @@ def main():
 
 
 if __name__ == '__main__':
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    model = VNet(num_classes=2).to(device)
+    # device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    # model = VNet(num_classes=2).to(device)
 
-    inputs = torch.randn(1, 1, 80, 128, 128) # BCDHW
-    inputs = inputs.to(device)
-    out = model(inputs)
-    print(out.shape) # torch.Size([1, 2, 64, 128, 128])
-    slices = out[0, 0, 32, :, :].detach().cpu().numpy()
-    print(slices)
+    # inputs = torch.randn(1, 1, 80, 128, 128) # BCDHW
+    # inputs = inputs.to(device)
+    # out = model(inputs)
+    # print(out.shape) # torch.Size([1, 2, 64, 128, 128])
+    # slices = out[0, 0, 32, :, :].detach().cpu().numpy()
+    # print(slices)
     # main()
+    
+    loss = BinaryDiceLoss()
+    input, target = torch.zeros(5, 20, 20, 20), torch.zeros(5, 20, 20, 20)
+    input[2:4, 6:8, 6:8, 6:8] = 1
+    target[3, 7:9, 3:7, 5:7] = 1
+    print(loss(input, target))
