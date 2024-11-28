@@ -84,7 +84,7 @@ class ClinicDB(VisionDataset):
         else:
             raise ValueError("unknown split type")
 
-        self.data = np.array(self.data)
+        self.data = np.array(self.data).transpose((0, 3, 1, 2))  # (N, C, H, W)
         self.targets = np.array(self.targets)  # (N, H, W)
 
     def __getitem__(self, index: int) -> Tuple[Tensor, Mapping[str, Tensor]]:
