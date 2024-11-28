@@ -40,50 +40,76 @@ class VNet(nn.Module):
 
 # https://github.com/hubutui/DiceLoss-PyTorch/blob/master/loss.py
 class BinaryDiceLoss(nn.Module):
-    """Dice loss of binary class"""
-    def __init__(self, smooth=1, p=2, reduction='mean'):
+    """Dice loss for binary classification tasks."""
+    def __init__(self, smooth=1.0, p=2, reduction='mean', from_logits=True):
         """
         Args:
-            smooth: A float number to smooth loss, and avoid NaN error, default: 1
-            p: Denominator value: \sum{x^p} + \sum{y^p}, default: 2
-            reduction: Reduction method to apply, return mean over batch if 'mean',
-                return sum if 'sum', return a tensor of shape [N,] if 'none'
+            smooth (float): A smoothing constant to avoid division by zero.
+            p (int): Power to apply in the denominator summation. Default is 2.
+            reduction (str): Specifies the reduction type: 'mean', 'sum', or 'none'.
+            from_logits (bool): If True, applies a sigmoid to `predict` to ensure it's a probability.
         """
-        super(BinaryDiceLoss, self).__init__()
+        super().__init__()
         self.smooth = smooth
         self.p = p
         self.reduction = reduction
+        self.from_logits = from_logits
+        if reduction not in {'mean', 'sum', 'none'}:
+            raise ValueError(f"Invalid reduction: {reduction}. Must be 'mean', 'sum', or 'none'.")
 
     def forward(self, predict: torch.Tensor, target: torch.Tensor):
         """
         Args:
-            predict: A tensor of shape [N, *]
-            target: A tensor of shape same with predict
+            predict (torch.Tensor): Predicted tensor of shape [N, *].
+            target (torch.Tensor): Ground truth tensor of shape [N, *].
 
         Returns:
-            Loss tensor according to arg reduction
-
-        Raise:
-            Exception if unexpected reduction
+            torch.Tensor: Calculated Dice loss.
         """
-        assert predict.shape[0] == target.shape[0], "predict & target batch size don't match"
+        # Validate inputs
+        if predict.shape != target.shape:
+            raise ValueError("Shape mismatch: predict and target must have the same shape.")
+
+        # Apply sigmoid if `from_logits` is True
+        if self.from_logits:
+            predict = torch.sigmoid(predict)
+
+        print = lambda *args: None  # Comment this line to enable print statements
+        print("---")
+        # Flatten the tensors
         predict = predict.contiguous().view(predict.shape[0], -1)
+        print(predict.min(), predict.max())
         target = target.contiguous().view(target.shape[0], -1)
+        if target.max() > 1:
+            target = target / 255  # Normalize to [0, 1]
+        print(target.min(), target.max())
 
-        num = torch.sum(torch.mul(predict, target), dim=1) + self.smooth
-        den = torch.sum(predict.pow(self.p) + target.pow(self.p), dim=1) + self.smooth
+        # Compute Dice loss
+        intersection = torch.sum(torch.mul(predict, target), dim=1)
+        print(intersection)
+        union = torch.sum(predict.pow(self.p) + target.pow(self.p), dim=1)
+        print(union)
+        dice_loss = 1 - (2 * intersection + self.smooth) / (union + self.smooth)
+        print(dice_loss)
 
-        loss = 1 - num / den
-
+        # Apply reduction
         if self.reduction == 'mean':
-            return loss.mean()
+            return dice_loss.mean()
         elif self.reduction == 'sum':
-            return loss.sum()
-        elif self.reduction == 'none':
-            return loss
-        else:
-            raise Exception('Unexpected reduction {}'.format(self.reduction))
+            return dice_loss.sum()
+        else:  # 'none'
+            return dice_loss
 
+
+class VNetBinaryDiceLoss(nn.Module):
+    """VNet outputs a tensor of shape [N, 2, H, W, D], so we need to apply the loss to the first channel."""
+
+    def __init__(self, smooth=1.0, p=2, reduction='mean', from_logits=True):
+        super().__init__()
+        self.dice_loss = BinaryDiceLoss(smooth=smooth, p=p, reduction=reduction, from_logits=from_logits)
+
+    def forward(self, predict, target):
+        return self.dice_loss(predict[:, 0], target)
 
 
 def main():
