@@ -6,7 +6,7 @@ readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
     "albumentations>=1.4.21",
-    "gradio==3.50.2",
+    "gradio==5.5.0",
     "imageio>=2.36.0",
     "ipywidgets>=8.1.5",
     "jaxtyping>=0.2.36",
